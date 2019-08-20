@@ -10,6 +10,11 @@
 poly * poly_mul_rank1( poly * a, poly * b)
 {
     poly * c = poly_alloc( a->rank + b->rank, false, NULL );
+    if ( c == NULL)
+    {
+        int errnum = ctrl_errno;
+        error_handle(errnum);
+    }
 
     c->coeff[ 0 ] = a->coeff[ 0 ] * b->coeff[ 0 ];
     c->coeff[ 1 ] = a->coeff[ 0 ] * b->coeff[ 1 ] + a->coeff[ 1 ] * b->coeff[ 0 ];
@@ -49,11 +54,22 @@ poly * poly_mul_genrl( poly * a, poly * b )
 
     // initialise two array to hold the DFTs
     double * p_arr_a = fftw_alloc_real( arr_len );
+    if ( p_arr_a == NULL )
+    {
+        int errnum = ctrl_errno;
+        error_handle(errnum);
+    }
+    
     double * p_arr_b = fftw_alloc_real( arr_len );
+    if ( p_arr_b == NULL )
+    {
+        int errnum = ctrl_errno;
+        error_handle(errnum);
+    }
 
     fftw_plan for_plan1 = fftw_plan_r2r_1d( arr_len, p_arr_a, p_arr_a, FFTW_R2HC, FFTW_ESTIMATE );
 
-    // copy over original array data
+    // copy the original coeff data
     memcpy( p_arr_a, a->coeff, ( 1 + a->rank ) * sizeof( double ) );
     memcpy( p_arr_b, b->coeff, ( 1 + b->rank ) * sizeof( double ) );
 
@@ -93,6 +109,11 @@ poly * poly_mul_genrl( poly * a, poly * b )
     }
 
     poly * ret_pol = poly_alloc( arr_len - 1, false, p_arr_a );
+    if ( ret_pol == NULL )
+    {
+        int errnum = ctrl_errno;
+        error_handle(errnum);
+    }
 
     fftw_free( p_arr_a );
 
