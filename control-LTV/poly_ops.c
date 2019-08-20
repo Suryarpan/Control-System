@@ -202,5 +202,29 @@ poly * poly_nmul( double x, poly * a )
  */
 poly * poly_pmul( poly * a, poly * b )
 {
-    poly * c;
+    poly * ret_pol = NULL;
+
+    if ( a->rank == 1 && b->rank == 1 )
+    {
+        ret_pol = poly_mul_rank1( a, b );
+    }
+    else if ( a->rank < 16 && b->rank < 16 )
+    {
+        ret_pol = poly_mul_rank15( a, b );
+    }
+    else
+    {
+        ret_pol = poly_mul_genrl( a, b );
+    }
+    
+    if ( !( a->owner ) )
+    {
+        poly_free( a );
+    }
+    if ( !( b->owner ) )
+    {
+        poly_free( b );
+    }
+
+    return ret_pol;
 }
