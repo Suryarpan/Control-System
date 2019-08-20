@@ -9,6 +9,13 @@
 
 extern int ctrl_errno;
 
+/*
+ * If coeff is NULL a blank polynomial is returned with all the elements initialized to zero.
+ * The owner of the polynomial will be as supplied to poly_alloc().
+ * 
+ * If coeff is supplied it will be copied to the field coeff of the returned poly.
+ * Number of coeff = 1 + rank
+ */
 poly * poly_alloc( int rank, bool owner, const double * coeff )
 {
     if( rank < 0 )
@@ -17,7 +24,29 @@ poly * poly_alloc( int rank, bool owner, const double * coeff )
         return NULL;
     }
 
-    if( owner )
+    if ( coeff == NULL )
+    {
+        poly * ret_pol = ( poly * ) malloc( sizeof( poly ) );
+        if ( ret_pol == NULL )
+        {
+            ctrl_errno = CTRL_ENOMEM;
+            return NULL;
+        }
+
+        ret_pol->coeff = calloc( rank + 1, sizeof( double ) );
+        if ( ret_pol->coeff == NULL)
+        {
+            free( ret_pol );
+            ctrl_errno = CTRL_ENOMEM;
+            return NULL;
+        }
+
+        ret_pol->rank = rank;
+        ret_pol->owner = owner;
+
+        return ret_pol;
+    }
+    else
     {
         poly * ret_pol = ( poly * ) malloc( sizeof( poly ) );
 
@@ -27,54 +56,35 @@ poly * poly_alloc( int rank, bool owner, const double * coeff )
             return NULL;
         }
 
-        ret_pol->rank = rank;
-        ret_pol->owner = true;
-        ret_pol->coeff = coeff;
-
-        return ret_pol;
-    }
-
-    else if ( coeff == NULL )
-    {
-        // struct hacking
-        poly * ret_pol = ( poly * ) malloc( sizeof( poly ) + ( 1 + rank ) * sizeof( double ) );
-        
-        if( ret_pol == NULL )
+        ret_pol->coeff = malloc( ( rank + 1 ) * sizeof( double ) );
+        if ( ret_pol->coeff == NULL )
         {
+            free( ret_pol );
             ctrl_errno = CTRL_ENOMEM;
             return NULL;
         }
 
         ret_pol->rank = rank;
-        ret_pol->owner = false;
-
-        return ret_pol;
-    }
-
-    else
-    {
-        // struct hacking
-        poly * ret_pol = ( poly * ) malloc( sizeof( poly ) + ( 1 + rank ) * sizeof( double ) );
-
-        if( ret_pol == NULL ) // checks memory allocation
-        {
-            ctrl_errno = CTRL_ENOMEM;
-            return NULL;
-        }
-
-        ret_pol->rank = rank;
-        ret_pol->owner = false;
+        ret_pol->owner = owner;
         memcpy( ret_pol->coeff, coeff, ( 1 + rank ) * sizeof( double ) );
 
         return ret_pol;
     }
 }
 
+/*
+ * ALWAYS CALL poly_free() TO FREE THE POLY POINTER.
+ * DO NOT call free() on a poly pointer.
+ */
 void poly_free( poly * a )
 {
+    free( a->coeff );
     free( a );
 }
 
+/*
+ * Adds two poly struct
+ */
 poly * poly_add( poly * a, poly * b )
 {
     poly * large, * small;
@@ -97,7 +107,6 @@ poly * poly_add( poly * a, poly * b )
         error_handle( errnum );
     }
     
-
     #pragma omp parallel for
     for ( int i = 0; i <= small->rank; i++ )
     {
@@ -117,48 +126,33 @@ poly * poly_add( poly * a, poly * b )
     return add_res;
 }
 
+/*
+ * Subtracts poly b from poly a.
+ * Order of subtraction is important.
+ */
 poly * poly_sub( poly * a, poly *b )
 {
-    poly * sub_res = NULL;
+    int large = a->rank > b->rank ? a->rank : b->rank;
 
-    if ( a->rank >= b->rank )
+    poly * sub_res = poly_alloc( large, false, NULL);
+    if ( sub_res == NULL)
     {
-        sub_res = poly_alloc( a->rank, false, a->coeff );
-        if ( sub_res == NULL )
-        {
-            int errnum = ctrl_errno;
-            error_handle( errnum );
-        }
-
-        #pragma omp parallel for
-        for ( int i = 0; i <= b->rank; i++ )
-        {
-            sub_res->coeff[ i ] -= b->coeff[ i ];
-        }
+        int errnum = ctrl_errno;
+        error_handle( errnum );
     }
-
-    else
+    
+    #pragma omp parallel for
+    for (int i = 0; i <= a->rank; i++)
     {
-        sub_res = poly_alloc( b->rank, false, b->coeff);
-        if ( sub_res == NULL )
-        {
-            int errnum = ctrl_errno;
-            error_handle( errnum );
-        }
-        
-        #pragma omp parallel for
-        for (int i = 0; i <= a->rank; i++)
-        {
-            sub_res->coeff[ i ] = a->coeff[ i ] - sub_res->coeff[ i ];
-        }
-
-        #pragma omp parallel for
-        for (int i = a->rank + 1; i <= b->rank; i++)
-        {
-            sub_res->coeff[ i ] *= -1.0;
-        }
+        sub_res->coeff[ i ] += a->coeff[ i ];
     }
-
+    
+    #pragma omp parallel for
+    for (int i = 0; i <= b->rank; i++)
+    {
+        sub_res->coeff[ i ] -= b->coeff[ i ];
+    }
+    
     if ( !a->owner )
     {
         poly_free( a );
@@ -172,6 +166,9 @@ poly * poly_sub( poly * a, poly *b )
     return sub_res;
 }
 
+/*
+ * Multiplies a double number to a polynomial
+ */
 poly * poly_nmul( double x, poly * a )
 {
     if ( x == 1.0 )
@@ -191,9 +188,18 @@ poly * poly_nmul( double x, poly * a )
     {
         res->coeff[ i ] *= x;
     }
+
+    if (!a->owner)
+    {
+        poly_free( a );
+    }
     
+    return res;
 }
 
+/*
+ * Multiplies two polynomial. Refer to pmul.c for more information.
+ */
 poly * poly_pmul( poly * a, poly * b )
 {
     poly * c;
