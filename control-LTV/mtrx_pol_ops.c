@@ -7,6 +7,13 @@
 
 extern int ctrl_errno;
 
+/*
+ * allocates memory for mtrx_p struct.
+ * Use row major order for array of poly pointer.
+ * If array of poly pointer is not supplied i.e. poly_pointer_arr is NULL
+ * a memory block of size row * column is supplied to the poly_elem field.
+ * If array is supplied, the address of the array is stored in poly_elem field.
+ */
 mtrx_p * mtrx_p_alloc( int row, int column, bool owner, poly ** poly_pointer_arr )
 {
     if ( !( row > 0 && column > 0 ) ) // ensures row > 0 and col > 0
@@ -68,18 +75,26 @@ mtrx_p * mtrx_p_alloc( int row, int column, bool owner, poly ** poly_pointer_arr
     }
 }
 
+/*
+ * It frees the memory associated with a mtrx_p pointer.
+ * DONOT CALL free() on a mtrx_p pointer.
+ * It will cause a whole array of poly pointers anonymous and thus causing a memory leak.
+ */
 void mtrx_p_free( mtrx_p * a )
 {
     #pragma omp parallel for
     for ( int i = 0; i < ( a->row * a->colm ); i++ )
     {
-        free( a->pol_elem[ i ]);
+        free( a->pol_elem[ i ] );
     }
     
     free( a->pol_elem );
     free( a );
 }
 
+/*
+ * Initialises a mtrx_p  pointer with all rank zero polynomials and owner set to false.
+ */
 static mtrx_p * mtrx_p_init( int row, int column, bool owner )
 {
     mtrx_p * ret_mat = mtrx_p_alloc( row, column, owner, NULL);
@@ -101,6 +116,10 @@ static mtrx_p * mtrx_p_init( int row, int column, bool owner )
     return ret_mat;
 }
 
+/*
+ * Adds two mtrx_p pointers.
+ * It also frees the input matrix if owner is set to false.
+ */
 mtrx_p * mtrx_p_add( mtrx_p * a, mtrx_p * b )
 {
     if ( !( ( a->row == b->row ) && ( a->colm == b->colm ) ) )
@@ -134,6 +153,10 @@ mtrx_p * mtrx_p_add( mtrx_p * a, mtrx_p * b )
     return add_res;
 }
 
+/*
+ * Subtracts two mtrx_p pointers. [ a - b ]
+ * It also frees the input matrix if owner is set to false.
+ */
 mtrx_p * mtrx_p_sub( mtrx_p * a, mtrx_p * b )
 {
     if ( !( ( a->row == b->row ) && ( a->colm == b->colm ) ) )
@@ -167,6 +190,10 @@ mtrx_p * mtrx_p_sub( mtrx_p * a, mtrx_p * b )
     return sub_res;
 }
 
+/*
+ * Multiplies a scalar(x) to the matrix(a).
+ * It also frees the input matrix if owner is set to false.
+ */
 mtrx_p * mtrx_p_nmul( double x, mtrx_p * a )
 {
     mtrx_p * mul_res = mtrx_p_alloc( a->row, a->colm, false, a->pol_elem );
@@ -189,6 +216,11 @@ mtrx_p * mtrx_p_nmul( double x, mtrx_p * a )
     return mul_res;
 }
 
+/*
+ * Multipies two matrix if multiplication is possible.
+ * It also frees the input matrix if owner is set to false.
+ * It is implemented in a row-major fashion.
+ */
 mtrx_p * mtrx_p_mmul( mtrx_p * a, mtrx_p * b )
 {
     if ( a->colm != b->row )
@@ -228,7 +260,7 @@ mtrx_p * mtrx_p_mmul( mtrx_p * a, mtrx_p * b )
     {
         mtrx_p_free( a );
     }
-    if( !( b->owner ) )
+    if ( !( b->owner ) )
     {
         mtrx_p_free( b );
     }
