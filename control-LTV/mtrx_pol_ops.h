@@ -17,4 +17,14 @@ typedef struct mtrx_p mtrx_p;
 
 mtrx_p * mtrx_p_alloc( int , int , bool, poly ** );
 
+void mtrx_p_free( mtrx_p * );
+
+mtrx_p * mtrx_p_add( mtrx_p *, mtrx_p * );
+
+mtrx_p * mtrx_p_sub( mtrx_p *, mtrx_p * );
+
+mtrx_p * mtrx_p_nmul( double, mtrx_p * );
+
+mtrx_p * mtrx_p_mmul( mtrx_p *, mtrx_p * );
+
 #endif // !MTRX_POL_OPS_H
