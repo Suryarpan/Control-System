@@ -12,8 +12,7 @@ poly * poly_mul_rank1( poly * a, poly * b)
     poly * c = poly_alloc( a->rank + b->rank, false, NULL );
     if ( c == NULL)
     {
-        int errnum = ctrl_errno;
-        error_handle(errnum);
+        return NULL;
     }
 
     c->coeff[ 0 ] = a->coeff[ 0 ] * b->coeff[ 0 ];
@@ -29,8 +28,7 @@ poly * poly_mul_rank15( poly * a, poly * b )
     poly * res = poly_alloc( a->rank + b->rank, false, NULL);
     if (res == NULL)
     {
-        int errnum = ctrl_errno;
-        error_handle(errnum);
+        return NULL;
     }
 
     #pragma omp parallel for
@@ -56,15 +54,13 @@ poly * poly_mul_genrl( poly * a, poly * b )
     double * p_arr_a = fftw_alloc_real( arr_len );
     if ( p_arr_a == NULL )
     {
-        int errnum = ctrl_errno;
-        error_handle(errnum);
+        return NULL;
     }
     
     double * p_arr_b = fftw_alloc_real( arr_len );
     if ( p_arr_b == NULL )
     {
-        int errnum = ctrl_errno;
-        error_handle(errnum);
+        return NULL;
     }
 
     fftw_plan for_plan1 = fftw_plan_r2r_1d( arr_len, p_arr_a, p_arr_a, FFTW_R2HC, FFTW_ESTIMATE );
@@ -111,8 +107,7 @@ poly * poly_mul_genrl( poly * a, poly * b )
     poly * ret_pol = poly_alloc( arr_len - 1, false, p_arr_a );
     if ( ret_pol == NULL )
     {
-        int errnum = ctrl_errno;
-        error_handle(errnum);
+        return NULL;
     }
 
     fftw_free( p_arr_a );
