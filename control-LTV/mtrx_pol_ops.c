@@ -8,7 +8,7 @@
 extern int ctrl_errno;
 
 /*
- * allocates memory for mtrx_p struct.
+ * Allocates memory for mtrx_p struct.
  * Use row major order for array of poly pointer.
  * If array of poly pointer is not supplied i.e. poly_pointer_arr is NULL
  * a memory block of size row * column is supplied to the poly_elem field.
