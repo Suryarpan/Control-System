@@ -12,7 +12,7 @@ extern int ctrl_errno;
  * Use row major order for array of poly pointer.
  * If array of poly pointer is not supplied i.e. poly_pointer_arr is NULL
  * a memory block of size row * column is supplied to the poly_elem field.
- * If array is supplied, the address of the array is stored in poly_elem field.
+ * If array is supplied, the address of the array is copied over to poly_elem field.
  */
 mtrx_p * mtrx_p_alloc( int row, int column, bool owner, poly ** poly_pointer_arr )
 {
