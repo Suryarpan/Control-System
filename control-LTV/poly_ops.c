@@ -1,5 +1,4 @@
 #include <omp.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -82,6 +81,19 @@ void poly_free( poly * a )
     free( a );
 }
 
+double poly_eval( double x, poly * a )
+{
+    double val = a->coeff[ a->rank ];
+    
+    for ( int i = a->rank - 1; i >= 0; i-- )
+    {
+        val *= x;
+        val += a->coeff[ i ];
+    }
+
+    return val;
+}
+
 /*
  * Adds two poly struct
  */
@@ -103,8 +115,7 @@ poly * poly_add( poly * a, poly * b )
     poly * add_res = poly_alloc( large->rank, false, large->coeff );
     if ( add_res == NULL)
     {
-        int errnum = ctrl_errno;
-        error_handle( errnum );
+        return NULL;
     }
     
     #pragma omp parallel for
@@ -137,8 +148,7 @@ poly * poly_sub( poly * a, poly *b )
     poly * sub_res = poly_alloc( large, false, NULL);
     if ( sub_res == NULL)
     {
-        int errnum = ctrl_errno;
-        error_handle( errnum );
+        return NULL;
     }
     
     #pragma omp parallel for
@@ -179,8 +189,7 @@ poly * poly_nmul( double x, poly * a )
     poly * res = poly_alloc( a->rank, false, a->coeff );
     if ( res == NULL )
     {
-        int errnum = ctrl_errno;
-        error_handle( errnum );
+        return NULL;
     }
     
     #pragma omp parallel for
@@ -204,7 +213,15 @@ poly * poly_pmul( poly * a, poly * b )
 {
     poly * ret_pol = NULL;
 
-    if ( a->rank == 1 && b->rank == 1 )
+    if ( a->rank == 0 )
+    {
+        ret_pol = poly_nmul( a->coeff[ 0 ], b );
+    }
+    else if ( b->rank == 0 )
+    {
+        ret_pol = poly_nmul( b->coeff[ 0 ], a );
+    }
+    else if ( a->rank == 1 && b->rank == 1 )
     {
         ret_pol = poly_mul_rank1( a, b );
     }
