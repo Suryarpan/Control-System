@@ -1,6 +1,7 @@
 #ifndef OPENBLAS_INTERFACE_H
 #define OPENBLAS_INTERFACE_H
 
+#include <stdlib.h>
 #include <stdbool.h>
 #include "cblas.h"
 
@@ -25,5 +26,7 @@ mtrx * mtrx_sub( mtrx *, mtrx * );
 mtrx * mtrx_nmul( double, mtrx * );
 
 mtrx * mtrx_mmul( mtrx *, mtrx * );
+
+mtrx * mtrx_vmul( mtrx *, mtrx * );
 
 #endif // !OPENBLAS_INTERFACE_H
