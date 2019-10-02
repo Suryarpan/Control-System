@@ -24,7 +24,7 @@ mtrx_p * mtrx_p_alloc( int row, int column, bool owner, poly ** poly_pointer_arr
 
     if( poly_pointer_arr == NULL )
     {
-        // allocating mtrx_p
+        // allocating space for mtrx_p struct
         mtrx_p * ret_mat = ( mtrx_p * ) malloc( sizeof( mtrx_p ) );
         if( ret_mat == NULL )
         {
@@ -45,11 +45,12 @@ mtrx_p * mtrx_p_alloc( int row, int column, bool owner, poly ** poly_pointer_arr
         ret_mat->colm = column;
         ret_mat->owner = owner;
 
+        ctrl_errno = CTRL_SUCCESS;
         return ret_mat;
     }
     else
     {
-        // allocating mtrx_p st
+        // allocating space for mtrx_p struct
         mtrx_p * ret_mat = ( mtrx_p * ) malloc( sizeof( mtrx_p ) );
         if ( ret_mat == NULL )
         {
@@ -71,6 +72,7 @@ mtrx_p * mtrx_p_alloc( int row, int column, bool owner, poly ** poly_pointer_arr
         ret_mat->owner = owner;
         memcpy( ret_mat->pol_elem, poly_pointer_arr, row * column * sizeof( poly * ) );
 
+        ctrl_errno = CTRL_SUCCESS;
         return ret_mat;
     }
 }
@@ -78,41 +80,44 @@ mtrx_p * mtrx_p_alloc( int row, int column, bool owner, poly ** poly_pointer_arr
 /*
  * It frees the memory associated with a mtrx_p pointer.
  * DONOT CALL free() on a mtrx_p pointer.
- * It will cause a whole array of poly pointers anonymous and thus causing a memory leak.
+ * It will cause a whole array of poly pointers to become
+ * anonymous and thus causing a memory leak.
  */
 void mtrx_p_free( mtrx_p * a )
 {
     #pragma omp parallel for
     for ( int i = 0; i < ( a->row * a->colm ); i++ )
     {
-        free( a->pol_elem[ i ] );
+        poly_free( a->pol_elem[ i ] );
     }
     
     free( a->pol_elem );
     free( a );
+    ctrl_errno = CTRL_SUCCESS;
 }
 
 /*
- * Initialises a mtrx_p  pointer with all rank zero polynomials and owner set to false.
+ * Initialises a mtrx_p pointer with all rank zero polynomials and owner set to false.
  */
 static mtrx_p * mtrx_p_init( int row, int column, bool owner )
 {
-    mtrx_p * ret_mat = mtrx_p_alloc( row, column, owner, NULL);
+    mtrx_p * ret_mat = mtrx_p_alloc( row, column, owner, NULL );
     if ( ret_mat == NULL)
     {
         return NULL;
     }
 
     #pragma omp parallel for
-    for (int i = 0; i < row * column; i++)
+    for ( int i = 0; i < row * column; ++i )
     {
-        ret_mat->pol_elem[ i ] = poly_alloc( 0, false, NULL);
+        ret_mat->pol_elem[ i ] = poly_alloc( 0, false, NULL );
         if ( ret_mat->pol_elem[ i ] == NULL )
         {
             return NULL;
         }
     }
     
+    ctrl_errno = CTRL_SUCCESS;
     return ret_mat;
 }
 
@@ -124,7 +129,7 @@ mtrx_p * mtrx_p_add( mtrx_p * a, mtrx_p * b )
 {
     if ( !( ( a->row == b->row ) && ( a->colm == b->colm ) ) )
     {
-        ctrl_errno = CTRL_ERANK;
+        ctrl_errno = CTRL_ESIZE;
         return NULL;
     }
 
@@ -150,6 +155,7 @@ mtrx_p * mtrx_p_add( mtrx_p * a, mtrx_p * b )
         mtrx_p_free( b );
     }
     
+    ctrl_errno = CTRL_SUCCESS;
     return add_res;
 }
 
@@ -161,7 +167,7 @@ mtrx_p * mtrx_p_sub( mtrx_p * a, mtrx_p * b )
 {
     if ( !( ( a->row == b->row ) && ( a->colm == b->colm ) ) )
     {
-        ctrl_errno = CTRL_ERANK;
+        ctrl_errno = CTRL_ESIZE;
         return NULL;
     }
 
@@ -187,6 +193,7 @@ mtrx_p * mtrx_p_sub( mtrx_p * a, mtrx_p * b )
         mtrx_p_free( b );
     }
 
+    ctrl_errno = CTRL_SUCCESS;
     return sub_res;
 }
 
@@ -213,6 +220,7 @@ mtrx_p * mtrx_p_nmul( double x, mtrx_p * a )
         mtrx_p_free( a );
     }
 
+    ctrl_errno = CTRL_SUCCESS;
     return mul_res;
 }
 
@@ -225,7 +233,7 @@ mtrx_p * mtrx_p_mmul( mtrx_p * a, mtrx_p * b )
 {
     if ( a->colm != b->row )
     {
-        ctrl_errno = CTRL_ERANK;
+        ctrl_errno = CTRL_ESIZE;
         return NULL;
     }
 
@@ -265,5 +273,6 @@ mtrx_p * mtrx_p_mmul( mtrx_p * a, mtrx_p * b )
         mtrx_p_free( b );
     }
 
+    ctrl_errno = CTRL_SUCCESS;
     return c;
 }
