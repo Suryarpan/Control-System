@@ -9,7 +9,7 @@ enum errnos{
     CTRL_EDOM    = 1,
     CTRL_ERANGE  = 2,
     CTRL_ENOMEM  = 3,
-    CTRL_ERANK   = 4,
+    CTRL_ESIZE   = 4,
 };
 
 void error_handle( int );
