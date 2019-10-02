@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../ctrl_error.h"
+#include "ctrl_error.h"
 #include "poly_ops.h"
 #include "pmul.h"
 
@@ -43,6 +43,7 @@ poly * poly_alloc( int rank, bool owner, const double * coeff )
         ret_pol->rank = rank;
         ret_pol->owner = owner;
 
+        ctrl_errno = CTRL_SUCCESS;
         return ret_pol;
     }
     else
@@ -67,6 +68,7 @@ poly * poly_alloc( int rank, bool owner, const double * coeff )
         ret_pol->owner = owner;
         memcpy( ret_pol->coeff, coeff, ( 1 + rank ) * sizeof( double ) );
 
+        ctrl_errno = CTRL_SUCCESS;
         return ret_pol;
     }
 }
@@ -79,6 +81,7 @@ void poly_free( poly * a )
 {
     free( a->coeff );
     free( a );
+    ctrl_errno = CTRL_SUCCESS;
 }
 
 double poly_eval( double x, poly * a )
@@ -91,6 +94,7 @@ double poly_eval( double x, poly * a )
         val += a->coeff[ i ];
     }
 
+    ctrl_errno = CTRL_SUCCESS;
     return val;
 }
 
@@ -134,6 +138,7 @@ poly * poly_add( poly * a, poly * b )
         poly_free( b );
     }
 
+    ctrl_errno = CTRL_SUCCESS;
     return add_res;
 }
 
@@ -143,7 +148,7 @@ poly * poly_add( poly * a, poly * b )
  */
 poly * poly_sub( poly * a, poly *b )
 {
-    int large = a->rank > b->rank ? a->rank : b->rank;
+    int large = ( a->rank > b->rank ? a->rank : b->rank );
 
     poly * sub_res = poly_alloc( large, false, NULL);
     if ( sub_res == NULL)
@@ -173,6 +178,7 @@ poly * poly_sub( poly * a, poly *b )
         poly_free( b );
     }
     
+    ctrl_errno = CTRL_SUCCESS;
     return sub_res;
 }
 
@@ -203,6 +209,7 @@ poly * poly_nmul( double x, poly * a )
         poly_free( a );
     }
     
+    ctrl_errno = CTRL_SUCCESS;
     return res;
 }
 
@@ -243,5 +250,6 @@ poly * poly_pmul( poly * a, poly * b )
         poly_free( b );
     }
 
+    ctrl_errno = CTRL_SUCCESS;
     return ret_pol;
 }
