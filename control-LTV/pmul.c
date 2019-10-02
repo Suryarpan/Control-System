@@ -19,6 +19,7 @@ poly * poly_mul_rank1( poly * a, poly * b)
     c->coeff[ 1 ] = a->coeff[ 0 ] * b->coeff[ 1 ] + a->coeff[ 1 ] * b->coeff[ 0 ];
     c->coeff[ 2 ] = a->coeff[ 1 ] * b->coeff[ 1 ];
 
+    ctrl_errno = CTRL_SUCCESS;
     return c;
 }
 
@@ -41,11 +42,12 @@ poly * poly_mul_rank15( poly * a, poly * b )
         }   
     }
     
+    ctrl_errno = CTRL_SUCCESS;
     return res;
 }
 
 // Multiplies two polynomial of any rank [ O(nlogn) ].
-// Uses twice the memrory of the returned polynomial.
+// Uses twice the memory of the returned polynomial.
 poly * poly_mul_genrl( poly * a, poly * b )
 {
     int arr_len = a->rank + b->rank + 1;
@@ -54,12 +56,14 @@ poly * poly_mul_genrl( poly * a, poly * b )
     double * p_arr_a = fftw_alloc_real( arr_len );
     if ( p_arr_a == NULL )
     {
+        ctrl_errno = CTRL_ENOMEM;
         return NULL;
     }
     
     double * p_arr_b = fftw_alloc_real( arr_len );
     if ( p_arr_b == NULL )
     {
+        ctrl_errno = CTRL_ENOMEM;
         return NULL;
     }
 
@@ -112,5 +116,6 @@ poly * poly_mul_genrl( poly * a, poly * b )
 
     fftw_free( p_arr_a );
 
+    ctrl_errno = CTRL_SUCCESS;
     return ret_pol;
 }
