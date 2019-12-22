@@ -20,6 +20,8 @@ mtrx * ss_dx( ss_mod *, mtrx *, mtrx * );
 
 mtrx * ss_y( ss_mod *, mtrx *, mtrx * );
 
-mtrx * ss_rk_dsolve_LTI( ss_mod *, mtrx *, mtrx *, double, int );
+void ss_rk_dsolve_LTI_x( ss_mod *, mtrx *, mtrx *, mtrx **, double, double, double );
+
+void ss_rk_dsolve_LTI_y( ss_mod *, mtrx *, mtrx *, mtrx **, double, int );
 
 #endif // !SS_MODEL_H
