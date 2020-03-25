@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "ss_model.h"
-#include "../ctrl_error.h"
+#include "ctrl_error.h"
 #include "openblas_interface.h"
 
 extern int ctrl_errno;
@@ -73,41 +73,4 @@ mtrx * ss_y( ss_mod * sys, mtrx * x, mtrx * u )
     }
     // general case
     return mtrx_add( mtrx_vmul( x, sys->C ), mtrx_mmul( sys->D, u ) );
-}
-
-/*
- * x_(n+1) = (I + A.h(I + A.h/2(I + A.h/3(I + A.h/4)))) x_n
- *              +   h(I + A.h/2(I + A.h/3(I + A.h/4)))B u_n
- */
-void ss_rk_dsolve_LTI_x( ss_mod * sys, mtrx * x0, mtrx * u,
-                          mtrx ** ret_x, double start, double end, double h )
-{
-    int step = 1 + ( int )( end - start) / h;
-    mtrx *coeff_un = NULL;
-    mtrx *coeff_xn = NULL;
-
-    // preprocessing
-    {
-        coeff_un = mtrx_init_unit( sys->A->row, false );
-
-        for (int i = 4; i > 1; --i)
-        {
-            coeff_un = mtrx_mmul( sys->A, coeff_un );
-            coeff_un = mtrx_nmul( h / i, coeff_un );
-            coeff_un = mtrx_add_unity( coeff_un );
-        }
-        coeff_un = mtrx_nmul( h, coeff_un );
-
-        coeff_un->owner = true;
-        coeff_xn = mtrx_mmul( sys->A, coeff_un );
-        coeff_xn = mtrx_add_unity( coeff_xn );
-
-        coeff_un->owner = false;
-        coeff_un = mtrx_mmul( coeff_un, sys->B );
-    }
-    // calculations of states
-    for (int i = 0; i < step; i++)
-    {
-        ret_x[ i ] = mtrx_add( mtrx_mmul( coeff_xn, x0 ), mtrx_mmul( coeff_un, u ) );
-    }
 }

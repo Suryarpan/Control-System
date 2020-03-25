@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "cblas.h"
+#include "../../Openblas/include/cblas.h"
 
 struct mtrx
 {
