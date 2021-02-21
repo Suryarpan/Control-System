@@ -1,17 +1,27 @@
 #ifndef CTRL_ERROR_H
 #define CTRL_ERROR_H
 
-int ctrl_errno;
+#include <errno.h>
 
-enum errnos{
-    CTRL_FAILURE = -1,
-    CTRL_SUCCESS = 0,
-    CTRL_EDOM    = 1,
-    CTRL_ERANGE  = 2,
-    CTRL_ENOMEM  = 3,
-    CTRL_ESIZE   = 4,
-};
+/* define errno */
+#define ctrl_errno errno
 
-void error_handle( int );
+/* Following are the list of error codes */
+
+/* Memory and Datatype related error */
+#define CTRL_ENOMEM ENOMEM /* No memory */
+
+/* Math related error */
+#define CTRL_EDOM EDOM     /* Numerical error with domain of input */
+#define CTRL_ERANGE ERANGE /* Out of array range */
+
+/* Array related error (self defined) */
+#define CTRL_EARRLEN 500 /* Bad array length */
+#define CTRL_EARRLEN_STR "Array length is bad"
+
+#define CTRL_EMATSIZE 501 /* Bad matrix size */
+#define CTRL_EMATSIZE_STR "Matrix sizes not compatible"
+
+void ctrl_perror(const char *s);
 
 #endif // !CTRL_ERROR_H
