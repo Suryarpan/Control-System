@@ -1,17 +1,14 @@
-# control-system
+# State Space Analysis (SSA)
 
-A state space based approach to solving computations of control system. The development is currently under progress. A short description of the files are given.
+## Introduction
 
-## control-LTI
-This folder is currently being developed. All of the functions(to be implemented) here require BLAS support. An interface to OpenBLAS is under development and will soon be available. This creates the required matrix functions to be used for solving state space model. A 4-th order Runge Kutta method will be used for solving the state space equations.
+A state space based approach to simulating various control systems. Currently, LTI and LTV type systems are being implemented. NL type systems will be added later.
 
-## control-LTV
-This folder is currently being developed. A polynomial struct is used for the time varying components in the A, B, C and D matrices. Addition, subtraction, multiplication of polynomials are implemented. Implementation of matrix with polynomial elements and subsequently required mathematical operations will be implemented. Support for vector instruction for such operations will be added later.
+The main focus is to create a C library which can be used within a C program to produce the simulation. A brief run down of the necessary dependencies is provided below.
 
-#### polynomial operations:
- - *Addition*: for loop based addition with OpenMP based parallelisation.
- - *Subtraction*: for loop based subtraction with OpenMp based parallelisation.
- - *Multiplication*: for loop based multiplication(*O(n<sup>2</sup>)*) or direct multiplication for small sized polynomials. DFT based multiplication(*O(nlogn)*) for larger polynomials with `double` coefficient. Cost of initialisation would be more for small polynomials. **FFTW-3.3.8** is used for computing the DFTs. An alternative much faster method based on Kronecker Trick is used for larger polynomials with `int` or `long int`. **GMP** is used for this purpose.
+**Dependencies**:
 
-## ctrl_error
-This file defines all of the error conditions and *errno* values. A capable error handler for required operations is under development.
+1. Mathematics library, such as provided by libc,
+2. [CBLAS](https://www.netlib.org/blas/) conforming library ([ATLAS](http://math-atlas.sourceforge.net/), [OpenBLAS](https://www.openblas.net/)).
+
+A brief documentation of the various types of systems and usages are given below.
