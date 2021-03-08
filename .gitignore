@@ -51,7 +51,11 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-.vs/
+# GTAG files
+GPATH
+GRTAGS
+GTAGS
+
+# IDE specific
+build/*
 .vscode/
-test*
-/CppProperties.json
