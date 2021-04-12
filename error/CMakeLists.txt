@@ -3,7 +3,6 @@ target_sources(error
     PUBLIC
     ssa_error.h
     ssa_error.c
-    ssa_log.c
     ssa_stream.c
     ssa_strerror.c)
 

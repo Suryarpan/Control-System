@@ -25,7 +25,6 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <threads.h>
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS
@@ -51,28 +50,28 @@ typedef int error_t; /* This is the error type */
 
 enum ssa_err_value
 {
-  SSA_SUCCESS  = 0,  /* Return success */
-  SSA_FAILURE  = -1, /* Return failure */
-  SSA_EDOM     = 1,  /* input domain error */
-  SSA_ERANGE   = 2,  /* output range error */
-  SSA_EFAULT   = 3,  /* faulty/invalid pointer */
-  SSA_EINVAL   = 4,  /* invalid argument(s) provided */
-  SSA_EFAILED  = 5,  /* general failure */
-  SSA_ESANITY  = 6,  /* sanity checked failed (very bad) */
-  SSA_ENOMEM   = 7,  /* malloc or friends failed */
-  SSA_ERUNAWAY = 8,  /* iteration out of control */
-  SSA_EMAXITER = 9,  /* exceeded max number of iterations */
-  SSA_EZERODIV = 10, /* tried to divide by zero */
-  SSA_EBADTOL  = 11, /* user specified an invalid tolerance */
-  SSA_ETOL     = 12, /* failed to reach the specified tolerance */
-  SSA_EUNDRFLW = 13, /* underflow */
-  SSA_EOVRFLW  = 14, /* overflow  */
-  SSA_EBADLEN  = 15, /* matrix, vector lengths are not conformant */
-  SSA_ENOTSQR  = 16, /* matrix not square */
-  SSA_EUNSUP   = 17, /* requested feature is not supported by the hardware */
-  SSA_EUNIMPL  = 18, /* requested feature not (yet) implemented */
-  SSA_ECACHE   = 19, /* cache limit exceeded */
-  SSA_EOF      = 20  /* end of file */
+  SSA_SUCCESS,  /* Return success */
+  SSA_FAILURE,  /* Return failure */
+  SSA_ERANGE,   /* output range error */
+  SSA_EDOM,     /* input domain error */
+  SSA_EFAULT,   /* faulty/invalid pointer */
+  SSA_EINVAL,   /* invalid argument(s) provided */
+  SSA_EFAILED,  /* general failure */
+  SSA_ESANITY,  /* sanity checked failed (very bad) */
+  SSA_ENOMEM,   /* malloc or friends failed */
+  SSA_ERUNAWAY, /* iteration out of control */
+  SSA_EMAXITER, /* exceeded max number of iterations */
+  SSA_EZERODIV, /* tried to divide by zero */
+  SSA_EBADTOL,  /* user specified an invalid tolerance */
+  SSA_ETOL,     /* failed to reach the specified tolerance */
+  SSA_EUNDRFLW, /* underflow */
+  SSA_EOVRFLW,  /* overflow  */
+  SSA_EBADLEN,  /* matrix, vector lengths are not conformant */
+  SSA_ENOTSQR,  /* matrix not square */
+  SSA_EUNSUP,   /* requested feature is not supported by the hardware */
+  SSA_EUNIMPL,  /* requested feature not (yet) implemented */
+  SSA_ECACHE,   /* cache limit exceeded */
+  SSA_EOF       /* end of file */
 };
 
 /* err_val -> string mapping */
@@ -99,11 +98,6 @@ void
 ssa_stream_printf (const char *label, const char *file, int line,
                    const char *reason);
 
-/* Useful for logging */
-void
-ssa_error_at_line (error_t ssa_errno, const char *file, int line,
-                   const char *fmt, ...);
-
 /*****************************************************************************
  *                     Error Handling Related Functions                      *
  *****************************************************************************/
@@ -127,6 +121,11 @@ ssa_handle_error (const char *reason, const char *file, int line,
  *                     Some useful error reporting define                    *
  *****************************************************************************/
 
+/* This is for general purpose error reporting
+ * Function must have following signature:
+ * error_t
+ * func(...){...}
+ */
 #define SSA_ERROR_RET(reason, ssa_errno)                                      \
   do                                                                          \
     {                                                                         \
@@ -135,6 +134,10 @@ ssa_handle_error (const char *reason, const char *file, int line,
     }                                                                         \
   while (0)
 
+/* This is for error reporting from general function with any signature
+ * [any return type] 
+ * func(...){...}
+ */
 #define SSA_ERROR_VAL(reason, ssa_errno, value)                               \
   do                                                                          \
     {                                                                         \
@@ -143,6 +146,10 @@ ssa_handle_error (const char *reason, const char *file, int line,
     }                                                                         \
   while (0)
 
+/* Error reporting from void returning function 
+ * void 
+ * func(...){...}
+ */
 #define SSA_ERROR_VOID(reason, ssa_errno)                                     \
   do                                                                          \
     {                                                                         \
@@ -151,11 +158,12 @@ ssa_handle_error (const char *reason, const char *file, int line,
     }                                                                         \
   while (0)
 
+/* This is for error reporting from malloc type function 
+ * void *
+ * func(...){...}
+ */
 #define SSA_ERROR_NULL(reason, ssa_errno)                                     \
   SSA_ERROR_VAL (reason, ssa_errno, NULL)
-
-#define SSA_ERROR_LOG(ssa_errno, fmt_str, ...)                                \
-  ssa_error_at_line (ssa_errno, __FILE__, __LINE__, fmt_str, ...);
 
 __END_DECLS
 
