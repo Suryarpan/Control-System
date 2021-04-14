@@ -20,8 +20,13 @@
 #ifndef SSA_ERROR_H
 #define SSA_ERROR_H
 
-#include "ssa_config.h"
-#include "ssa_export.h"
+#ifdef SSA_BUILD_GUARDS
+#  include "ssa_config.h"
+#  include "ssa_export.h"
+#elif !defined(SSA_INTERNAL_HEADER)
+#  error Never include "ssa_error.h" directly. Use "ssa/ssa.h"
+#endif
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -74,7 +79,7 @@ enum ssa_err_value
   SSA_EOF       /* end of file */
 };
 
-/* err_val -> string mapping */
+/* error value to string mapping */
 const char *
 ssa_strerror (error_t err_val);
 
@@ -135,7 +140,7 @@ ssa_handle_error (const char *reason, const char *file, int line,
   while (0)
 
 /* This is for error reporting from general function with any signature
- * [any return type] 
+ * [any return type]
  * func(...){...}
  */
 #define SSA_ERROR_VAL(reason, ssa_errno, value)                               \
@@ -146,8 +151,8 @@ ssa_handle_error (const char *reason, const char *file, int line,
     }                                                                         \
   while (0)
 
-/* Error reporting from void returning function 
- * void 
+/* Error reporting from void returning function
+ * void
  * func(...){...}
  */
 #define SSA_ERROR_VOID(reason, ssa_errno)                                     \
@@ -158,7 +163,7 @@ ssa_handle_error (const char *reason, const char *file, int line,
     }                                                                         \
   while (0)
 
-/* This is for error reporting from malloc type function 
+/* This is for error reporting from malloc type function
  * void *
  * func(...){...}
  */

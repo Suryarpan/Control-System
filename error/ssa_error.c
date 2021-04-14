@@ -62,7 +62,7 @@ ssa_handle_error (const char *reason, const char *file, int line,
 {
   if (ssa_error_handler)
     {
-      (*ssa_error_handler) (reason, file, line, ssa_errno);
+      ssa_error_handler(reason, file, line, ssa_errno);
       return;
     }
   ssa_stream_printf ("ERROR", file, line, reason);

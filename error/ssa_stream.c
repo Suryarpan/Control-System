@@ -27,7 +27,7 @@
 FILE *ssa_stream SSA_NO_EXPORT                         = NULL;
 ssa_stream_handler_t *ssa_stream_handler SSA_NO_EXPORT = NULL;
 
-ssa_stream_handler_t *
+SSA_EXPORT ssa_stream_handler_t *
 ssa_set_stream_handler (ssa_stream_handler_t *new_handler)
 {
   ssa_stream_handler_t *prev_handler = ssa_stream_handler;
@@ -58,7 +58,7 @@ ssa_stream_printf (const char *label, const char *file, int line,
     }
   if (ssa_stream_handler)
     {
-      (*ssa_stream_handler) (label, file, line, reason);
+      ssa_stream_handler(label, file, line, reason);
       return;
     }
   fprintf (use_stream, "SSA: %s:%d: %s: %s", file, line, label, reason);
