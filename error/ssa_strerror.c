@@ -20,7 +20,7 @@
 #include "ssa_error.h"
 
 const char *
-ssa_strerror (error_t err_val)
+ssa_strerror (ssa_error_t err_val)
 {
   switch (err_val)
     {
@@ -32,8 +32,6 @@ ssa_strerror (error_t err_val)
         return "invalid pointer";
       case SSA_EINVAL:
         return "invalid argument(s) supplied by user";
-      case SSA_EFAILED:
-        return "general failure";
       case SSA_ESANITY:
         return "sanity checked failed (very bad)";
       case SSA_ENOMEM:
@@ -48,20 +46,10 @@ ssa_strerror (error_t err_val)
         return "user specified an invalid tolerance";
       case SSA_ETOL:
         return "failed to reach the specified tolerance";
-      case SSA_EUNDRFLW:
-        return "underflow occurred";
-      case SSA_EOVRFLW:
-        return "overflow occurred";
       case SSA_EBADLEN:
         return "matrix, vector lengths are not conformant";
       case SSA_ENOTSQR:
         return "matrix not square";
-      case SSA_EUNSUP:
-        return "requested feature is not supported by the hardware";
-      case SSA_EUNIMPL:
-        return "requested feature not (yet) implemented";
-      case SSA_ECACHE:
-        return "cache limit exceeded";
       case SSA_EOF:
         return "end of file";
       default:

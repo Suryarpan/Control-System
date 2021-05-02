@@ -11,7 +11,7 @@ target_include_directories(error
 
 target_compile_definitions(error
     PRIVATE
-    $<BUILD_INTERFACE:SSA_BUILD_GUARDS>)
+    $<BUILD_INTERFACE:SSA_BUILD_GUARD>)
 
 install(FILES ssa_error.h
     DESTINATION ${CUSTOM_INCLUDE_DIR}/error)

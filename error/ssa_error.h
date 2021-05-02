@@ -20,40 +20,35 @@
 #ifndef SSA_ERROR_H
 #define SSA_ERROR_H
 
-#ifdef SSA_BUILD_GUARDS
+#ifdef SSA_BUILD_GUARD
 #  include "ssa_config.h"
 #  include "ssa_export.h"
 #elif !defined(SSA_INTERNAL_HEADER)
 #  error Never include "ssa_error.h" directly. Use "ssa/ssa.h"
-#endif
+#endif /* !SSA_BUILD_GUARD */
 
-#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 
-#undef __BEGIN_DECLS
-#undef __END_DECLS
+#undef BEGIN_DECLS
+#undef END_DECLS
 #ifdef __cplusplus
-#  define __BEGIN_DECLS                                                       \
+#  define BEGIN_DECLS                                                         \
     extern "C"                                                                \
     {
-#  define __END_DECLS }
+#  define END_DECLS }
 #else
-#  define __BEGIN_DECLS /* empty */
-#  define __END_DECLS   /* empty */
+#  define BEGIN_DECLS /* empty */
+#  define END_DECLS   /* empty */
 #endif
 
-__BEGIN_DECLS
-
-#ifndef __STDC_LIB_EXT1__
-typedef int error_t; /* This is the error type */
-#endif
+BEGIN_DECLS
 
 /*****************************************************************************
  *                   Error value enum and mapping to string                  *
  *****************************************************************************/
 
-enum ssa_err_value
+enum /* SSA error values */
 {
   SSA_SUCCESS,  /* Return success */
   SSA_FAILURE,  /* Return failure */
@@ -61,7 +56,6 @@ enum ssa_err_value
   SSA_EDOM,     /* input domain error */
   SSA_EFAULT,   /* faulty/invalid pointer */
   SSA_EINVAL,   /* invalid argument(s) provided */
-  SSA_EFAILED,  /* general failure */
   SSA_ESANITY,  /* sanity checked failed (very bad) */
   SSA_ENOMEM,   /* malloc or friends failed */
   SSA_ERUNAWAY, /* iteration out of control */
@@ -69,19 +63,17 @@ enum ssa_err_value
   SSA_EZERODIV, /* tried to divide by zero */
   SSA_EBADTOL,  /* user specified an invalid tolerance */
   SSA_ETOL,     /* failed to reach the specified tolerance */
-  SSA_EUNDRFLW, /* underflow */
-  SSA_EOVRFLW,  /* overflow  */
   SSA_EBADLEN,  /* matrix, vector lengths are not conformant */
   SSA_ENOTSQR,  /* matrix not square */
-  SSA_EUNSUP,   /* requested feature is not supported by the hardware */
-  SSA_EUNIMPL,  /* requested feature not (yet) implemented */
-  SSA_ECACHE,   /* cache limit exceeded */
   SSA_EOF       /* end of file */
 };
 
+/* Error type */
+typedef const unsigned char ssa_error_t;
+
 /* error value to string mapping */
 const char *
-ssa_strerror (error_t err_val);
+ssa_strerror (ssa_error_t err_val);
 
 /*****************************************************************************
  *                         Error Stream & Reporting                          *
@@ -110,7 +102,7 @@ ssa_stream_printf (const char *label, const char *file, int line,
 /* Error handler type */
 typedef void
 ssa_error_handler_t (const char *reason, const char *file, int line,
-                     error_t ssa_errno);
+                     ssa_error_t ssa_errno);
 
 ssa_error_handler_t *
 ssa_set_error_handler (ssa_error_handler_t *new_handler);
@@ -120,7 +112,7 @@ ssa_set_error_handler_off (void);
 
 void
 ssa_handle_error (const char *reason, const char *file, int line,
-                  error_t ssa_errno);
+                  ssa_error_t ssa_errno);
 
 /*****************************************************************************
  *                     Some useful error reporting define                    *
@@ -170,6 +162,6 @@ ssa_handle_error (const char *reason, const char *file, int line,
 #define SSA_ERROR_NULL(reason, ssa_errno)                                     \
   SSA_ERROR_VAL (reason, ssa_errno, NULL)
 
-__END_DECLS
+END_DECLS
 
 #endif // !SSA_ERROR_H

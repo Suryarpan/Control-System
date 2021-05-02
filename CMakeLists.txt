@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 include(cmake/BuildOutOfSource.cmake)
 
@@ -17,11 +17,6 @@ endif(MSVC)
 if(NOT APPLE)
     set(CMAKE_INSTALL_RPATH $ORIGIN) # rpath to be used
 endif(NOT APPLE)
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-    set(CMAKE_EXPORT_COMPILE_COMMANDS true) # export compile commands
-    set(SSA_DEBUG true)
-endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 option(ENABLE_CODE_COVERAGE "Build with code coverage information" OFF)
 if(ENABLE_CODE_COVERAGE)
@@ -58,7 +53,6 @@ include(CheckIncludeFile)
 check_include_file(malloc.h HAVE_MALLOC_H)
 check_include_file(stddef.h HAVE_STDDEF_H)
 check_include_file(stdlib.h HAVE_STDLIB_H)
-check_include_file(time.h HAVE_TIME_H)
 check_include_file(stdarg.h HAVE_STDARG_H)
 check_include_file(math.h HAVE_MATH_H)
 
@@ -69,9 +63,6 @@ check_prototype_definition (posix_memalign "int posix_memalign(void **memptr, si
 
 # Check symbol exists
 include(CheckSymbolExists)
-check_symbol_exists(time time.h HAVE_TIME)
-check_symbol_exists(localtime time.h HAVE_LOCALTIME)
-check_symbol_exists(strftime time.h HAVE_STRFTIME)
 check_symbol_exists(memalign malloc.h HAVE_MEMALIGN)
 check_symbol_exists(posix_memalign stdlib.h HAVE_POSIX_MEMALIGN)
 check_symbol_exists(isnan math.h HAVE_ISNAN)
@@ -89,6 +80,7 @@ configure_file(ssa_config.h.in ssa_config.h)
 include_directories(${CMAKE_BINARY_DIR})
 # Installation
 include(GNUInstallDirs)
+set(CUSTOM_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/ssa)
 
 # Project compile flags
 set(CMAKE_POSITION_INDEPENDENT_CODE true)
@@ -105,21 +97,35 @@ include(cmake/SpecialFlags.cmake)
 
 # Project Building
 add_subdirectory(error)
+add_subdirectory(datatypes)
 
 # Main library
 add_library(ssa
     SHARED
-    $<TARGET_OBJECTS:error>)
+    $<TARGET_OBJECTS:error>
+    $<TARGET_OBJECTS:ssa_types>)
+
+# Export header
+include(GenerateExportHeader)
+generate_export_header(ssa
+    BASE_NAME SSA)
 
 set_target_properties(ssa
     PROPERTIES
     SOVERSION ${SSA_VERSION_MAJOR}
-    VERSION ${SSA_VERSION})
+    VERSION ${SSA_VERSION}
+    PUBLIC_HEADER 
+    ${CMAKE_SOURCE_DIR}/include/ssa.h)
 
-# Export header
-include(GenerateExportHeader)
-generate_export_header(ssa)
+install(TARGETS ssa 
+    PUBLIC_HEADER 
+    DESTINATION ${CUSTOM_INCLUDE_DIR})
+install(FILES
+    ${CMAKE_BINARY_DIR}/ssa_export.h
+    ${CMAKE_BINARY_DIR}/ssa_config.h
+    DESTINATION ${CUSTOM_INCLUDE_DIR})
 
+# CMake package Config File
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     SSAConfigVersion.cmake
@@ -130,7 +136,6 @@ write_basic_package_version_file(
 if(PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
     if(BUILD_TESTS)
         enable_testing()
-        include(GoogleTest)
         add_subdirectory(tests)
     endif(BUILD_TESTS)
 endif(PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)

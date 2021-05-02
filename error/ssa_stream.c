@@ -23,9 +23,12 @@
 #include <stdio.h>
 #include <time.h>
 
-/* default stream and handler */
-FILE *ssa_stream SSA_NO_EXPORT                         = NULL;
-ssa_stream_handler_t *ssa_stream_handler SSA_NO_EXPORT = NULL;
+/* -*- output file stream -*-
+ * Note: volatile pointer to avoid unwanted optimization */
+FILE *volatile ssa_stream SSA_NO_EXPORT = NULL;
+/* -*- output stream handler -*-
+ * Note: volatile pointer to avoid unwanted optimization */
+ssa_stream_handler_t *volatile ssa_stream_handler SSA_NO_EXPORT = NULL;
 
 SSA_EXPORT ssa_stream_handler_t *
 ssa_set_stream_handler (ssa_stream_handler_t *new_handler)
@@ -35,7 +38,7 @@ ssa_set_stream_handler (ssa_stream_handler_t *new_handler)
   return prev_handler;
 }
 
-FILE *
+SSA_EXPORT FILE *
 ssa_set_stream (FILE *new_stream)
 {
   FILE *prev_stream = ssa_stream;
@@ -58,7 +61,7 @@ ssa_stream_printf (const char *label, const char *file, int line,
     }
   if (ssa_stream_handler)
     {
-      ssa_stream_handler(label, file, line, reason);
+      ssa_stream_handler (label, file, line, reason);
       return;
     }
   fprintf (use_stream, "SSA: %s:%d: %s: %s", file, line, label, reason);

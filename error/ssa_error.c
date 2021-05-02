@@ -22,21 +22,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-ssa_error_handler_t *ssa_error_handler SSA_NO_EXPORT = NULL;
+#ifndef __GNUC__
+#  define _unused /* Nothing */
+#else
+#  define _unused __attribute__ ((unused))
+#endif
+
+/* $ Address of error handler $
+ * Note: Volatile pointer to avoid problems during optimization
+ */
+ssa_error_handler_t *volatile ssa_error_handler SSA_NO_EXPORT = NULL;
 
 SSA_NO_EXPORT void
-no_error_handler (const char *reason, const char *file, int line,
-                  error_t ssa_errno)
+no_error_handler (const char *reason _unused, const char *file _unused,
+                  int line _unused, ssa_error_t ssa_errno _unused)
 {
-  /* Do nothing */
-  reason = NULL;
+/* Do nothing */
+#ifndef __GNUC__
   (void)reason;
-  file = NULL;
   (void)file;
-  line = 0;
   (void)line;
-  ssa_errno = 0;
   (void)ssa_errno;
+#endif
   return;
 }
 
@@ -56,13 +63,13 @@ ssa_set_error_handler_off (void)
   return prev_handler;
 }
 
-SSA_NO_EXPORT void
+void
 ssa_handle_error (const char *reason, const char *file, int line,
-                  error_t ssa_errno)
+                  ssa_error_t ssa_errno)
 {
   if (ssa_error_handler)
     {
-      ssa_error_handler(reason, file, line, ssa_errno);
+      ssa_error_handler (reason, file, line, ssa_errno);
       return;
     }
   ssa_stream_printf ("ERROR", file, line, reason);
