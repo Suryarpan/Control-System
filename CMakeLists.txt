@@ -119,7 +119,9 @@ set_target_properties(ssa
 
 install(TARGETS ssa 
     PUBLIC_HEADER 
-    DESTINATION ${CUSTOM_INCLUDE_DIR})
+    DESTINATION ${CUSTOM_INCLUDE_DIR}
+    LIBRARY
+    DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES
     ${CMAKE_BINARY_DIR}/ssa_export.h
     ${CMAKE_BINARY_DIR}/ssa_config.h
