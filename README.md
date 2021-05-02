@@ -1,6 +1,7 @@
 # State Space Analysis (SSA)
 
 [![Documentation Status](https://readthedocs.org/projects/ssa/badge/?version=latest)](https://ssa.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.com/Suryarpan/control-system.svg?branch=master)](https://travis-ci.com/Suryarpan/control-system)
 
 ## Introduction
 
