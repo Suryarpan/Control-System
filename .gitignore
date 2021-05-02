@@ -51,11 +51,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# GTAG files
-GPATH
-GRTAGS
-GTAGS
-
 # IDE specific
 build/*
 .vscode/
+.cache/
+docs/_build/*

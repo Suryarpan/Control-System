@@ -1,14 +1,6 @@
 #ifndef _SSA_CONFIG_H_
 #define _SSA_CONFIG_H_
 
-/* Extra debug symbols */
-#cmakedefine SSA_DEBUG
-#ifndef SSA_DEBUG
-#  ifndef NDEBUG
-#    define NDEBUG
-#  endif /* NDEBUG */
-#endif /* SSA_DEBUG */
-
 /* Enable various intrinsics */
 /* SIMD */
 #cmakedefine HAVE_SIMD
@@ -78,12 +70,26 @@
 #  define ALIGN_TO @ALIGNMENT@
 #endif
 
-#define SSA_FULL_VERSION @SSA_VERSION@
+#define SSA_VERSION @SSA_VERSION@
 
 #define SSA_MAJOR_VERSION @SSA_VERSION_MAJOR@
 
 #define SSA_MINOR_VERSION @SSA_VERSION_MINOR@
 
 #define SSA_PATCH_VERSION @SSA_VERSION_PATCH@
+
+#define SSA_VERSION_S "@SSA_VERSION@"
+
+#define SSA_ENCODE_VERSION(major, minor,patch) \
+    ((major) << 24 | (minor) << 16 | (patch) << 8)
+
+#define SSA_VERSION_HEX \
+    (SSA_VERSION_ENCODE(SSA_MAJOR_VERSION, SSA_MINOR_VERSION, SSA_PATCH_VERSION))
+
+#define SSA_CHECK_VERSION(major,minor,patch)   \
+        (SSA_MAJOR_VERSION > (major) || \
+         (SSA_MAJOR_VERSION == (major) && SSA_MINOR_VERSION > (minor)) || \
+         (SSA_MAJOR_VERSION == (major) && SSA_MINOR_VERSION == (minor) && \
+          SSA_PATCH_VERSION >= (patch)))
 
 #endif /* !_SSA_CONFIG_H_ */
